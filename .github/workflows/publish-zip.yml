@@ -23,8 +23,8 @@ jobs:
           SHORT_SHA=${GITHUB_SHA::7}
           TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
           TAG="v${TIMESTAMP}-${SHORT_SHA}"
-          # Fixed zip name requested by user
-          ZIP_NAME="PactpiaResoucepack.zip"
+          # Fixed zip name requested by user (corrected spelling)
+          ZIP_NAME="PactpiaResourcePack.zip"
           echo "TAG=${TAG}" >> $GITHUB_OUTPUT
           echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_OUTPUT
 
