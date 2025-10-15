@@ -23,7 +23,8 @@ jobs:
           SHORT_SHA=${GITHUB_SHA::7}
           TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
           TAG="v${TIMESTAMP}-${SHORT_SHA}"
-          ZIP_NAME="${TAG}.zip"
+          # Fixed zip name requested by user
+          ZIP_NAME="PactpiaResoucepack.zip"
           echo "TAG=${TAG}" >> $GITHUB_OUTPUT
           echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_OUTPUT
 
@@ -34,25 +35,11 @@ jobs:
           zip -r "$ZIP_NAME" . -x ".git/*" ".github/*" "node_modules/*" "**/__pycache__/*" || true
           ls -lh "$ZIP_NAME"
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release and upload ZIP
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.vars.outputs.TAG }}
-          release_name: ${{ steps.vars.outputs.TAG }}
-          body: |
-            Automated release created when changes were merged to `main`.
-          draft: false
-          prerelease: false
-
-      - name: Upload ZIP to release
-        uses: actions/upload-release-asset@v1
+          name: ${{ steps.vars.outputs.TAG }}
+          files: ${{ steps.vars.outputs.ZIP_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.vars.outputs.ZIP_NAME }}
-          asset_name: ${{ steps.vars.outputs.ZIP_NAME }}
-          asset_content_type: application/zip
