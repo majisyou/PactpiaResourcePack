@@ -20,9 +20,11 @@ jobs:
       - name: Prepare tag and zip name
         id: vars
         run: |
+          # Use a fixed tag so the download URL stays constant
+          # Fixed tag 'latest' will allow the path: /releases/download/latest/PactpiaResourcePack.zip
           SHORT_SHA=${GITHUB_SHA::7}
           TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
-          TAG="v${TIMESTAMP}-${SHORT_SHA}"
+          TAG="latest"
           # Fixed zip name requested by user (corrected spelling)
           ZIP_NAME="PactpiaResourcePack.zip"
           echo "TAG=${TAG}" >> $GITHUB_OUTPUT
