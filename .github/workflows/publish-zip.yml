@@ -1,0 +1,58 @@
+name: Publish ZIP on merge to main
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Zip and publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare tag and zip name
+        id: vars
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
+          TAG="v${TIMESTAMP}-${SHORT_SHA}"
+          ZIP_NAME="${TAG}.zip"
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+          echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Create ZIP archive
+        run: |
+          ZIP_NAME=${{ steps.vars.outputs.ZIP_NAME }}
+          # Exclude Git internals and workflow files
+          zip -r "$ZIP_NAME" . -x ".git/*" ".github/*" "node_modules/*" "**/__pycache__/*" || true
+          ls -lh "$ZIP_NAME"
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.vars.outputs.TAG }}
+          release_name: ${{ steps.vars.outputs.TAG }}
+          body: |
+            Automated release created when changes were merged to `main`.
+          draft: false
+          prerelease: false
+
+      - name: Upload ZIP to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.vars.outputs.ZIP_NAME }}
+          asset_name: ${{ steps.vars.outputs.ZIP_NAME }}
+          asset_content_type: application/zip
