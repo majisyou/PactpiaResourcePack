@@ -35,11 +35,22 @@ jobs:
           zip -r "$ZIP_NAME" . -x ".git/*" ".github/*" "node_modules/*" "**/__pycache__/*" || true
           ls -lh "$ZIP_NAME"
 
-      - name: Create Release and upload ZIP
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.vars.outputs.TAG }}
-          name: ${{ steps.vars.outputs.TAG }}
-          files: ${{ steps.vars.outputs.ZIP_NAME }}
+      - name: Create Release (if missing) and upload ZIP (overwrite if exists)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG=${{ steps.vars.outputs.TAG }}
+          ZIP=${{ steps.vars.outputs.ZIP_NAME }}
+          echo "Authenticating gh CLI..."
+          echo "$GITHUB_TOKEN" | gh auth login --with-token
+          echo "Ensure release exists (create if missing): $TAG"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists"
+          else
+            gh release create "$TAG" --title "$TAG" --notes "Automated release created when changes were merged to main."
+            echo "Release $TAG created"
+          fi
+          echo "Uploading $ZIP to release $TAG (will overwrite if exists)"
+          gh release upload "$TAG" "$ZIP" --clobber
+          echo "Upload complete"
