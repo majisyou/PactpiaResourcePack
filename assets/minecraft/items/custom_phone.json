@@ -1,0 +1,14 @@
+{
+    "model":{
+        "type":"model",
+        "model":"minecraft:item/custom_phone",
+        "tints": [{
+            "type": "minecraft:dye",
+            "default": [
+            0,
+            0,
+            0
+            ]
+        }]
+    }
+}
