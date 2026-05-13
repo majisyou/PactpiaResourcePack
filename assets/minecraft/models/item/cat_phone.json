@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:item/phone/cat_screen",
+    "layer1": "minecraft:item/phone/cat_frame"
+  }
+}
