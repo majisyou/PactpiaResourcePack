@@ -1,7 +1,7 @@
 {
     "model":{
         "type":"model",
-        "model":"minecraft:item/cat_phone",
+        "model":"minecraft:item/phone_cat",
         "tints": [{
             "type": "minecraft:dye",
             "default": [
